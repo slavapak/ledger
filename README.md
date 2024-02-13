@@ -26,7 +26,7 @@ First clone this repo.
 
 2. In terminal
 ```sh
-$ docker compose --profile prod up -d
+docker compose --profile prod up -d
 ```
 3. In browser navigate to [http://localhost]()
 
@@ -37,7 +37,7 @@ Backend unit tests run during the build
 1. In terminal cd to repo root if not there
 2. In terminal
 ```sh
-$ docker compose --profile tests up --abort-on-container-exit test_quart && docker compose stop test_postgres
+docker compose --profile tests up --abort-on-container-exit test_quart && docker compose stop test_postgres
 ```
 
 ### Run Backend Locally:
@@ -47,9 +47,9 @@ In terminal cd to repo root if not there
 #### Set Up venv:
 1. In terminal
 ```sh
-$ python3 -m venv .venv
-$ . .venv/bin/activate
-$ pip install -r quart/requirements.txt
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r quart/requirements.txt
 ```
 
 After that you can run app and tests locally.
@@ -58,38 +58,38 @@ After that you can run app and tests locally.
 1. In terminal cd to repo root if not there
 2. In terminal
 ```sh
-$ docker compose up -d test_postgres && pytest --envfile=integration.env quart/integration && docker compose stop test_postgres
+docker compose up -d test_postgres && pytest --envfile=integration.env quart/integration && docker compose stop test_postgres
 ```
 
 #### App
 1. In terminal cd to repo root if not there
 2. In terminal:
 ```sh
-$ docker compose up -d ledger_postgres
-$ uvicorn --app-dir quart/src/ --env-file .env ledger.app:app --port 4001
+docker compose up -d ledger_postgres
+uvicorn --app-dir quart/src/ --env-file .env ledger.app:app --port 4001
 ```
 
 To test it, in terminal
 ```sh
-$ curl http://localhost:4001/users/1
+curl http://localhost:4001/users/1
 ```
 
 #### Unit Tests:
 1. In terminal cd to repo root if not there
 2. In terminal
 ```sh
-$ pytest quart/test
+pytest quart/test
 ```
 
 ### To run API frontend locally:
 1. In terminal cd to repo root if not there
 2. In terminal
 ```sh
-$ docker compose up -d ledger_quart
-$ cd nextjs
-$ npm install nextjs
-$ echo "NEXT_PUBLIC_API_URL=http://localhost:4000" > .env.local
-$ echo "NEXT_PUBLIC_DEFAULT_BALANCE=100" >> .env.local
-$ npm run dev
+docker compose up -d ledger_quart
+cd nextjs
+npm install nextjs
+echo "NEXT_PUBLIC_API_URL=http://localhost:4000" > .env.local
+echo "NEXT_PUBLIC_DEFAULT_BALANCE=100" >> .env.local
+npm run dev
 ```
 3. In browser navigate to [http://localhost:3000]()
