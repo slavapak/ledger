@@ -1,0 +1,6 @@
+asyncpg
+quart
+quart-cors
+pytest-asyncio
+pytest-dotenv
+uvicorn

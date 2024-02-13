@@ -1,0 +1,108 @@
+services:
+
+  ledger_postgres:
+    profiles:
+      - prod
+    container_name: postgres16
+    image: postgres:16
+    command:
+      - 'postgres'
+      - '-c'
+      - 'idle_in_transaction_session_timeout=10s'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres      
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ledger_quart:
+    profiles:
+      - prod
+    container_name: ledger_quart
+    image: ledger_quart:1.0.0
+    build:
+      context: ./quart
+    ports:
+      - ${API_PORT}:${API_PORT}
+    environment:
+      - DATASOURCE=postgresql://postgres:postgres@postgres16:5432/postgres      
+      - DEFAULT_BALANCE=${DEFAULT_BALANCE}
+      - SCHEMA_PATH=${SCHEMA_PATH}
+    command:
+      - 'uvicorn'
+      - '--app-dir'
+      - 'src/'
+      - '--host'
+      - '${API_HOST}'
+      - '--port'
+      - '${API_PORT}'
+      - 'ledger.app:app'
+    depends_on:   
+      ledger_postgres:
+        condition: service_healthy
+
+  ledger_nextjs:
+    profiles:
+      - prod
+    container_name: ledger_nextjs
+    image: ledger_nextjs:1.0.0
+    build:
+      context: ./nextjs
+      args:
+        - NEXT_PUBLIC_API_URL=http://${API_HOST}:${API_PORT}
+        - NEXT_PUBLIC_DEFAULT_BALANCE=${DEFAULT_BALANCE}
+    ports:
+      - 80:80
+    depends_on:
+      - ledger_quart
+
+  test_postgres:
+    profiles: 
+      - test
+    container_name: test_postgres    
+    image: postgres:16
+    command:
+      - 'postgres'
+      - '-p'
+      - '5433'      
+      - '-c'
+      - 'idle_in_transaction_session_timeout=10s'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - 5433:5433
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -p 5433"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  
+  test_quart:
+    profiles: 
+      - test
+    container_name: test_quart
+    image: ledger_quart:1.0.0    
+    command:
+      - 'pytest'
+      - 'integration'          
+    environment:
+      - DATASOURCE=postgresql://postgres:postgres@test_postgres:5433/postgres      
+      - DEFAULT_BALANCE=${DEFAULT_BALANCE}
+      - SCHEMA_PATH=${SCHEMA_PATH}
+    depends_on:            
+      test_postgres:
+        condition: service_healthy
+
+
+volumes:
+  pgdata: {}

@@ -1,0 +1,6 @@
+.next
+.venv
+node_modules
+npm-debug.log
+pytest_cache
+README.md

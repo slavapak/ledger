@@ -1,0 +1,8 @@
+/__pypackages__
+/.mypy_cache
+/node_modules
+.pdm-python
+.pytest_cache
+.venv
+*.pyc
+*~
